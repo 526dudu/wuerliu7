@@ -1,17 +1,15 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="utf-8">
-    <title>公告</title>
+    <title>公告系统</title>
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            padding-bottom: 60px; /* 为固定的底部导航留出空间 */
-            background-color: white; /* 增加白底背景 */
+            padding-bottom: 60px;
+            background-color: white;
         }
-
         .top-bar {
             position: fixed;
             top: 0;
@@ -28,32 +26,105 @@
             justify-content: center;
             align-items: center;
         }
-
         .menu-icon {
             position: absolute;
             left: 15px;
             cursor: pointer;
             font-size: 24px;
         }
-
+        .module-button {
+            position: absolute;
+            right: 15px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 13px;
+            height: 30px;
+        }
+        .module-button:hover {
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+        }
+        .module-button:focus {
+            outline: none;
+            border-color: #a8c9e4;
+            box-shadow: 0 0 0 2px rgba(168, 201, 228, 0.3);
+        }
+        .module-button::after {
+            content: "▼";
+            margin-left: 5px;
+            font-size: 9px;
+        }
+        .module-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            z-index: 200;
+            display: none;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease-in-out;
+            min-width: max-content;
+            font-size: 13px;
+        }
+        .module-dropdown a {
+            color: black;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .module-dropdown a:hover {
+            background-color: #f0f7ff;
+            padding-left: 16px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .content {
             margin-top: 50px;
             padding: 15px;
         }
-
         .entry {
             margin-bottom: 15px;
             padding: 10px;
             border-radius: 5px;
             background-color: #f9f9f9;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 16px; /* 增大字体大小 */
         }
-
         .date {
             font-weight: bold;
             color: #333;
+            margin-bottom: 8px; /* 增加日期与内容的间距 */
+            font-size: 18px; /* 日期字体稍大 */
         }
-
+        .content-text {
+            line-height: 1.4; /* 优化行高，保持可读性 */
+            white-space: pre-wrap; /* 保留换行符 */
+            word-wrap: break-word; /* 防止长单词溢出 */
+        }
+        /* 针对多行文本的优化 */
+        .content-text br {
+            line-height: 1.2; /* 调整<br>标签后的行高 */
+        }
+        /* 确保内容中的p标签不会增加额外的间距 */
+        .content-text p {
+            margin: 0;
+            padding: 0;
+            line-height: 1.4; /* 保持段落内的行高一致 */
+        }
         .month-nav {
             position: fixed;
             bottom: 0;
@@ -69,7 +140,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .month-nav button {
             padding: 5px 15px;
             margin: 0 10px;
@@ -77,28 +147,28 @@
             background-color: transparent;
             cursor: pointer;
             font-size: 16px;
+            transition: all 0.2s ease;
         }
-
+        .month-nav button:hover:not(:disabled) {
+            color: #4a86e8;
+            transform: scale(1.1);
+        }
         .month-nav button:disabled {
             color: #ccc;
             cursor: not-allowed;
         }
-
         .current-month-display {
             font-size: 18px;
             font-weight: bold;
             min-width: 100px;
             text-align: center;
         }
-
-        .month-section {
+        .module-section {
             display: none;
         }
-
-        .month-section.active {
+        .module-section.active {
             display: block;
         }
-
         .sidebar {
             position: fixed;
             top: 0;
@@ -110,32 +180,31 @@
             transition: 0.3s;
             z-index: 200;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            border-radius: 0 10px 10px 0;
         }
-
         .sidebar-header {
             padding: 15px;
             background-color: #e0e0e0;
             text-align: center;
             font-weight: bold;
             font-size: 18px;
+            border-radius: 0 10px 0 0;
         }
-
         .sidebar ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
         }
-
         .sidebar li {
             padding: 10px 15px;
             border-bottom: 1px solid #ddd;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
-
         .sidebar li:hover {
-            background-color: #ddd;
+            background-color: #e8f4ff;
+            padding-left: 20px;
         }
-
         .overlay {
             position: fixed;
             top: 0;
@@ -145,166 +214,237 @@
             background-color: rgba(0, 0, 0, 0.3);
             display: none;
             z-index: 150;
+            backdrop-filter: blur(2px);
         }
-
         .close-btn {
             position: absolute;
             top: 0;
             right: 15px;
             font-size: 30px;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .close-btn:hover {
+            color: #ff4d4f;
+            transform: rotate(90deg);
         }
     </style>
 </head>
-
 <body>
     <div class="top-bar">
         <div class="menu-icon" id="menuIcon">☰</div>
-        公告
+        <span id="moduleTitle">公告</span>
+        <div class="module-button" id="moduleButton">
+            <span id="currentModuleText">公告</span>
+        </div>
+        <div class="module-dropdown" id="moduleDropdown">
+            <a href="javascript:void(0)" data-module="announcement">公告</a>
+            <a href="javascript:void(0)" data-module="wiki">Wiki</a>
+        </div>
     </div>
-
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            月份导航
+            <span id="sidebarTitle">月份导航</span>
             <span class="close-btn" id="closeBtn">×</span>
         </div>
-        <ul id="monthList">
-            <!-- 月份列表将通过JavaScript动态生成 -->
-        </ul>
+        <ul id="navList"></ul>
     </div>
-
     <div class="overlay" id="overlay"></div>
-
-    <div class="content" id="content">
-        <!-- 公告内容将通过JavaScript动态生成 -->
-    </div>
-
+    <div class="content" id="content"></div>
     <div class="month-nav" id="monthNav">
-        <button id="prevMonth" disabled>◀</button>
-        <div class="current-month-display" id="currentMonthDisplay">2025.7</div>
-        <button id="nextMonth">▶</button>
+        <button id="prevNav" disabled>◀</button>
+        <div class="current-month-display" id="currentNavDisplay">2025.7</div>
+        <button id="nextNav">▶</button>
     </div>
-
     <script>
-        //公告
-        const announcements = [
-			//{ date: "", content: "" },
-			{ date: "2000-05-26", content: "我也不知道写这个干啥" },
-			{ date: "2025-07-16", content: "本项目从今日开始创作" },
-            { date: "2025-07-17", content: "加入公告功能（借助了github网站）" },
-			{ date: "11-45-14", content: "花子我潮逆🐎" },
-			{ date: "2025-07-18", content: "今天不想更新" },
-        ];
-
-        // 按月份分组
-        const announcementsByMonth = {};
-        announcements.forEach(item => {
-            const [year, month] = item.date.split('-');
-            const monthKey = `${year}-${month}`;
-            if (!announcementsByMonth[monthKey]) {
-                announcementsByMonth[monthKey] = [];
+        // 模块数据
+        const modules = {
+            announcement: {
+                title: "公告",
+                data: [
+                    { date: "2000-05-26", content: "我也不知道写这个干啥" },
+                    { date: "2025-07-16", content: "本项目从今日开始创作" },
+                    { date: "2025-07-17", content: "加入公告功能（借助了github网站）" },
+                    { date: "11-45-14", content: "花子我潮逆🐎" },
+                    { date: "2025-07-18", content: "今天不想更新" },
+					{ date: "2025-07-19", content: "更新Wiki\n电量不足提醒\n连接GitHub提醒\n通知提醒" },
+					//{ date: "", content: "" },
+                ],
+                groupBy: "month", // 按月份分组
+                navType: "月份"
+            },
+            wiki: {
+                title: "Wiki",
+                data: [
+                    { date: "2025-07-19", category: "？", content: "？" },
+                    //{ date: "2025-07-15", category: "常见问题", content: "关于账号登录的常见问题解答" },
+                    //{ date: "2025-07-20", category: "常见问题", content: "内容编辑权限说明" },
+					//{ date: "介绍", category: "入门指南", content: "欢迎使用本Wiki，本指南将帮助你快速上手" },
+					//{ date: "基础操作说明", category: "入门指南", content: "基础操作说明：点击左侧菜单可查看分类" },
+					//{ date: "", category: "", content: "" },
+                ],
+                groupBy: "category", // 按栏目分组
+                navType: "栏目"
             }
-            announcementsByMonth[monthKey].push(item);
-        });
-
-        // 获取所有月份（按降序排列）
-        const months = Object.keys(announcementsByMonth).sort().reverse();
-        let currentMonthIndex = 0;
-
-        // 生成公告内容
-        function renderAnnouncements() {
-            const contentDiv = document.getElementById('content');
-            contentDiv.innerHTML = '';
+        };
+        
+        // 当前激活的模块和导航项
+        let currentModule = "announcement";
+        let groupedData = {};
+        let navItems = [];
+        let currentNavIndex = 0;
+        let isModuleDropdownOpen = false;
+        
+        // 初始化模块
+        function initModule(moduleKey) {
+            const module = modules[moduleKey];
+            currentModule = moduleKey;
             
-            // 为每个月份创建一个section
-            months.forEach((monthKey, index) => {
-                const [year, month] = monthKey.split('-');
-                const monthSection = document.createElement('div');
-                monthSection.className = 'month-section';
-                monthSection.id = `month-${monthKey}`;
-                
-                if (index === currentMonthIndex) {
-                    monthSection.classList.add('active');
+            // 更新标题
+            document.getElementById("moduleTitle").textContent = module.title;
+            document.getElementById("currentModuleText").textContent = module.title;
+            document.getElementById("sidebarTitle").textContent = `${module.navType}导航`;
+            
+            // 按分组方式处理数据
+            groupedData = {};
+            module.data.forEach(item => {
+                let key;
+                if (module.groupBy === "month") {
+                    // 按月份分组
+                    const [year, month] = item.date.split('-');
+                    key = `${year}-${month}`;
+                } else if (module.groupBy === "category") {
+                    // 按栏目分组
+                    key = item.category;
                 }
                 
-                // 添加月份标题
-                const monthHeader = document.createElement('h2');
-                monthHeader.textContent = `${year}年${month}月`;
-                monthSection.appendChild(monthHeader);
+                if (!groupedData[key]) {
+                    groupedData[key] = [];
+                }
+                groupedData[key].push(item);
+            });
+            
+            // 获取导航项并排序
+            navItems = Object.keys(groupedData).sort((a, b) => {
+                return module.groupBy === "month" ? b.localeCompare(a) : a.localeCompare(b);
+            });
+            
+            currentNavIndex = 0;
+            renderContent();
+            updateNavDisplay();
+            renderSidebarNav();
+            
+            // 关闭模块下拉菜单
+            closeModuleDropdown();
+        }
+        
+        // 渲染内容 - 每次只显示当前选中的月份/栏目
+        function renderContent() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '';
+            const module = modules[currentModule];
+            
+            // 为所有导航项创建内容区域，但只显示当前选中的
+            navItems.forEach((itemKey, index) => {
+                const section = document.createElement('div');
+                section.className = `module-section ${currentModule}-section`;
+                section.id = `${currentModule}-${itemKey}`;
                 
-                // 添加该月的所有公告
-                announcementsByMonth[monthKey]
-                    .sort((a, b) => b.date.localeCompare(a.date)) // 按日期降序排列
+                // 只给当前选中的导航项添加active类
+                if (index === currentNavIndex) {
+                    section.classList.add('active');
+                }
+                
+                // 添加标题
+                const header = document.createElement('h2');
+                if (module.groupBy === "month") {
+                    const [year, month] = itemKey.split('-');
+                    header.textContent = `${year}年${month}月`;
+                } else {
+                    header.textContent = itemKey;
+                }
+                section.appendChild(header);
+                
+                // 添加内容项
+                groupedData[itemKey]
+                    .sort((a, b) => b.date.localeCompare(a.date)) // 按日期降序
                     .forEach(item => {
                         const entry = document.createElement('div');
                         entry.className = 'entry';
+                        
+                        // 为内容创建单独的容器，应用优化的行高
                         entry.innerHTML = `
                             <div class="date">${item.date}</div>
-                            <div>${item.content}</div>
+                            <div class="content-text">${item.content}</div>
                         `;
-                        monthSection.appendChild(entry);
+                        section.appendChild(entry);
                     });
                 
-                contentDiv.appendChild(monthSection);
+                contentDiv.appendChild(section);
             });
         }
-
-        // 更新当前月份显示
-        function updateMonthDisplay() {
-            const currentMonthKey = months[currentMonthIndex];
-            const [year, month] = currentMonthKey.split('-');
-            document.getElementById('currentMonthDisplay').textContent = `${year}.${month}`;
+        
+        // 更新导航显示
+        function updateNavDisplay() {
+            const module = modules[currentModule];
+            const currentItemKey = navItems[currentNavIndex];
+            let displayText;
             
-            // 禁用/启用翻页按钮
-            document.getElementById('prevMonth').disabled = currentMonthIndex === 0;
-            document.getElementById('nextMonth').disabled = currentMonthIndex === months.length - 1;
+            if (module.groupBy === "month") {
+                const [year, month] = currentItemKey.split('-');
+                displayText = `${year}.${month}`;
+            } else {
+                displayText = currentItemKey;
+            }
+            
+            document.getElementById('currentNavDisplay').textContent = displayText;
+            
+            // 更新导航按钮状态
+            document.getElementById('prevNav').disabled = currentNavIndex === 0;
+            document.getElementById('nextNav').disabled = currentNavIndex === navItems.length - 1;
         }
-
-        // 生成侧边栏月份列表
-        function renderSidebarMonths() {
-            const monthList = document.getElementById('monthList');
-            monthList.innerHTML = '';
+        
+        // 渲染侧边栏导航
+        function renderSidebarNav() {
+            const navList = document.getElementById('navList');
+            navList.innerHTML = '';
+            const module = modules[currentModule];
             
-            months.forEach((monthKey, index) => {
-                const [year, month] = monthKey.split('-');
-                const monthItem = document.createElement('li');
-                monthItem.textContent = `${year}年${month}月`;
-                monthItem.addEventListener('click', () => {
-                    currentMonthIndex = index;
-                    switchMonth();
+            navItems.forEach((itemKey, index) => {
+                const item = document.createElement('li');
+                let text;
+                
+                if (module.groupBy === "month") {
+                    const [year, month] = itemKey.split('-');
+                    text = `${year}年${month}月`;
+                } else {
+                    text = itemKey;
+                }
+                
+                item.textContent = text;
+                item.addEventListener('click', () => {
+                    currentNavIndex = index;
+                    switchNav();
                     closeSidebar();
                 });
                 
-                monthList.appendChild(monthItem);
+                navList.appendChild(item);
             });
         }
-
-        // 侧边栏交互
-        function openSidebar() {
-            document.getElementById('sidebar').style.left = '0';
-            document.getElementById('overlay').style.display = 'block';
-            document.body.style.overflow = 'hidden'; // 防止背景滚动
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').style.left = '-250px';
-            document.getElementById('overlay').style.display = 'none';
-            document.body.style.overflow = ''; // 恢复背景滚动
-        }
-
-        // 切换月份
-        function switchMonth() {
-            // 隐藏所有月份
-            document.querySelectorAll('.month-section').forEach(section => {
+        
+        // 切换导航项 - 只显示选中的月份/栏目
+        function switchNav() {
+            // 隐藏所有分组
+            document.querySelectorAll(`.${currentModule}-section`).forEach(section => {
                 section.classList.remove('active');
             });
             
-            // 显示当前月份
-            const currentMonthKey = months[currentMonthIndex];
-            document.getElementById(`month-${currentMonthKey}`).classList.add('active');
+            // 显示当前分组
+            const currentItemKey = navItems[currentNavIndex];
+            document.getElementById(`${currentModule}-${currentItemKey}`).classList.add('active');
             
-            // 更新月份显示
-            updateMonthDisplay();
+            // 更新显示
+            updateNavDisplay();
             
             // 平滑滚动到顶部
             window.scrollTo({
@@ -312,60 +452,100 @@
                 behavior: 'smooth'
             });
         }
-
-        // 添加键盘左右箭头翻页功能
-        function handleKeyDown(e) {
-            // 左箭头键 (KeyCode 37)
-            if (e.keyCode === 37) {
-                if (currentMonthIndex > 0) {
-                    currentMonthIndex--;
-                    switchMonth();
-                }
-            }
-            // 右箭头键 (KeyCode 39)
-            else if (e.keyCode === 39) {
-                if (currentMonthIndex < months.length - 1) {
-                    currentMonthIndex++;
-                    switchMonth();
-                }
-            }
+        
+        // 侧边栏控制
+        function openSidebar() {
+            document.getElementById('sidebar').style.left = '0';
+            document.getElementById('overlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
         }
-
-        // 初始化页面
+        
+        function closeSidebar() {
+            document.getElementById('sidebar').style.left = '-250px';
+            document.getElementById('overlay').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        // 模块下拉菜单控制
+        function toggleModuleDropdown() {
+            const dropdown = document.getElementById('moduleDropdown');
+            isModuleDropdownOpen = !isModuleDropdownOpen;
+            dropdown.style.display = isModuleDropdownOpen ? 'block' : 'none';
+        }
+        
+        function closeModuleDropdown() {
+            isModuleDropdownOpen = false;
+            document.getElementById('moduleDropdown').style.display = 'none';
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 模块切换按钮
+            document.getElementById('moduleButton').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleModuleDropdown();
+            });
+            
+            // 模块切换菜单项
+            document.querySelectorAll('#moduleDropdown a').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const moduleKey = item.getAttribute('data-module');
+                    initModule(moduleKey);
+                });
+            });
+            
+            // 导航按钮
+            document.getElementById('prevNav').addEventListener('click', () => {
+                if (currentNavIndex > 0) {
+                    currentNavIndex--;
+                    switchNav();
+                }
+            });
+            
+            document.getElementById('nextNav').addEventListener('click', () => {
+                if (currentNavIndex < navItems.length - 1) {
+                    currentNavIndex++;
+                    switchNav();
+                }
+            });
+            
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode === 37) { // 左箭头
+                    if (currentNavIndex > 0) {
+                        currentNavIndex--;
+                        switchNav();
+                    }
+                } else if (e.keyCode === 39) { // 右箭头
+                    if (currentNavIndex < navItems.length - 1) {
+                        currentNavIndex++;
+                        switchNav();
+                    }
+                }
+            });
+            
+            // 侧边栏事件
+            document.getElementById('menuIcon').addEventListener('click', openSidebar);
+            document.getElementById('closeBtn').addEventListener('click', closeSidebar);
+            document.getElementById('overlay').addEventListener('click', closeSidebar);
+            
+            // 点击外部关闭模块下拉菜单
+            document.addEventListener('click', (e) => {
+                if (isModuleDropdownOpen) {
+                    closeModuleDropdown();
+                }
+            });
+        }
+        
+        // 初始化
         function init() {
-            if (months.length > 0) {
-                renderAnnouncements();
-                updateMonthDisplay();
-                renderSidebarMonths();
-                
-                // 绑定月份翻页事件
-                document.getElementById('prevMonth').addEventListener('click', () => {
-                    if (currentMonthIndex > 0) {
-                        currentMonthIndex--;
-                        switchMonth();
-                    }
-                });
-                
-                document.getElementById('nextMonth').addEventListener('click', () => {
-                    if (currentMonthIndex < months.length - 1) {
-                        currentMonthIndex++;
-                        switchMonth();
-                    }
-                });
-                
-                // 绑定键盘事件
-                document.addEventListener('keydown', handleKeyDown);
-                
-                // 侧边栏交互事件
-                document.getElementById('menuIcon').addEventListener('click', openSidebar);
-                document.getElementById('closeBtn').addEventListener('click', closeSidebar);
-                document.getElementById('overlay').addEventListener('click', closeSidebar);
-            }
+            initModule(currentModule);
+            bindEvents();
         }
-
+        
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-
 </html>
