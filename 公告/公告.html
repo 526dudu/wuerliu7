@@ -266,9 +266,10 @@
                     { date: "2025-07-16", content: "本项目从今日开始创作" },
                     { date: "2025-07-17", content: "加入公告功能（借助了github网站）" },
                     { date: "11-45-14", content: "花子我潮逆🐎" },
-                    { date: "2025-07-18", content: "今天不想更新" },
-					{ date: "2025-07-19", content: "更新Wiki\n电量不足提醒\n连接GitHub提醒\n通知提醒" },
-					//{ date: "", content: "" },
+                    { date: "2025-07-18", content: "更新电量不足提醒（虽然是7.19凌晨更新的啦）" },
+                    { date: "2025-07-18", content: "<del>今天不想更新（划掉）</del>" },
+                    { date: "2025-07-19", content: "更新Wiki\n连接GitHub提醒\n通知提醒" },
+                    { date: "2025-07-20", content: "更新了进入游戏的动画" },
                 ],
                 groupBy: "month", // 按月份分组
                 navType: "月份"
@@ -276,35 +277,33 @@
             wiki: {
                 title: "Wiki",
                 data: [
-                    { date: "2025-07-19", category: "？", content: "？" },
-                    //{ date: "2025-07-15", category: "常见问题", content: "关于账号登录的常见问题解答" },
-                    //{ date: "2025-07-20", category: "常见问题", content: "内容编辑权限说明" },
-					//{ date: "介绍", category: "入门指南", content: "欢迎使用本Wiki，本指南将帮助你快速上手" },
-					//{ date: "基础操作说明", category: "入门指南", content: "基础操作说明：点击左侧菜单可查看分类" },
-					//{ date: "", category: "", content: "" },
+                    { date: "介绍", category: "基础入门", content: "欢迎观看本Wiki，祝你能找到你想要的答案！\n（打开左边三横导航快速查找）" },
+                    { date: "键位设置", category: "基础入门", content: "暂且没键位，我啥玩意都没做哪来的键位（2025-07-20）" },
+                    { date: "注册销账号", category: "基础入门", content: "游戏都没做要干啥" },
+                    { date: "快速登录", category: "基础入门", content: "无，等我以后做" },
                 ],
                 groupBy: "category", // 按栏目分组
                 navType: "栏目"
             }
         };
-        
+
         // 当前激活的模块和导航项
         let currentModule = "announcement";
         let groupedData = {};
         let navItems = [];
         let currentNavIndex = 0;
         let isModuleDropdownOpen = false;
-        
+
         // 初始化模块
         function initModule(moduleKey) {
             const module = modules[moduleKey];
             currentModule = moduleKey;
-            
+
             // 更新标题
             document.getElementById("moduleTitle").textContent = module.title;
             document.getElementById("currentModuleText").textContent = module.title;
             document.getElementById("sidebarTitle").textContent = `${module.navType}导航`;
-            
+
             // 按分组方式处理数据
             groupedData = {};
             module.data.forEach(item => {
@@ -317,44 +316,44 @@
                     // 按栏目分组
                     key = item.category;
                 }
-                
+
                 if (!groupedData[key]) {
                     groupedData[key] = [];
                 }
                 groupedData[key].push(item);
             });
-            
+
             // 获取导航项并排序
             navItems = Object.keys(groupedData).sort((a, b) => {
                 return module.groupBy === "month" ? b.localeCompare(a) : a.localeCompare(b);
             });
-            
+
             currentNavIndex = 0;
             renderContent();
             updateNavDisplay();
             renderSidebarNav();
-            
+
             // 关闭模块下拉菜单
             closeModuleDropdown();
         }
-        
+
         // 渲染内容 - 每次只显示当前选中的月份/栏目
         function renderContent() {
             const contentDiv = document.getElementById('content');
             contentDiv.innerHTML = '';
             const module = modules[currentModule];
-            
+
             // 为所有导航项创建内容区域，但只显示当前选中的
             navItems.forEach((itemKey, index) => {
                 const section = document.createElement('div');
                 section.className = `module-section ${currentModule}-section`;
                 section.id = `${currentModule}-${itemKey}`;
-                
+
                 // 只给当前选中的导航项添加active类
                 if (index === currentNavIndex) {
                     section.classList.add('active');
                 }
-                
+
                 // 添加标题
                 const header = document.createElement('h2');
                 if (module.groupBy === "month") {
@@ -364,120 +363,132 @@
                     header.textContent = itemKey;
                 }
                 section.appendChild(header);
-                
+
                 // 添加内容项
-                groupedData[itemKey]
-                    .sort((a, b) => b.date.localeCompare(a.date)) // 按日期降序
-                    .forEach(item => {
+                if (currentModule === "wiki") {
+                    // Wiki模块：按代码中的上下位置排序（不排序）
+                    groupedData[itemKey].forEach(item => {
                         const entry = document.createElement('div');
                         entry.className = 'entry';
-                        
-                        // 为内容创建单独的容器，应用优化的行高
                         entry.innerHTML = `
                             <div class="date">${item.date}</div>
                             <div class="content-text">${item.content}</div>
                         `;
                         section.appendChild(entry);
                     });
-                
+                } else {
+                    // 其他模块：按日期降序排序
+                    groupedData[itemKey]
+                        .sort((a, b) => b.date.localeCompare(a.date))
+                        .forEach(item => {
+                            const entry = document.createElement('div');
+                            entry.className = 'entry';
+                            entry.innerHTML = `
+                                <div class="date">${item.date}</div>
+                                <div class="content-text">${item.content}</div>
+                            `;
+                            section.appendChild(entry);
+                        });
+                }
+
                 contentDiv.appendChild(section);
             });
         }
-        
+
         // 更新导航显示
         function updateNavDisplay() {
             const module = modules[currentModule];
             const currentItemKey = navItems[currentNavIndex];
             let displayText;
-            
+
             if (module.groupBy === "month") {
                 const [year, month] = currentItemKey.split('-');
                 displayText = `${year}.${month}`;
             } else {
                 displayText = currentItemKey;
             }
-            
+
             document.getElementById('currentNavDisplay').textContent = displayText;
-            
+
             // 更新导航按钮状态
             document.getElementById('prevNav').disabled = currentNavIndex === 0;
             document.getElementById('nextNav').disabled = currentNavIndex === navItems.length - 1;
         }
-        
+
         // 渲染侧边栏导航
         function renderSidebarNav() {
             const navList = document.getElementById('navList');
             navList.innerHTML = '';
             const module = modules[currentModule];
-            
+
             navItems.forEach((itemKey, index) => {
                 const item = document.createElement('li');
                 let text;
-                
+
                 if (module.groupBy === "month") {
                     const [year, month] = itemKey.split('-');
                     text = `${year}年${month}月`;
                 } else {
                     text = itemKey;
                 }
-                
+
                 item.textContent = text;
                 item.addEventListener('click', () => {
                     currentNavIndex = index;
                     switchNav();
                     closeSidebar();
                 });
-                
+
                 navList.appendChild(item);
             });
         }
-        
+
         // 切换导航项 - 只显示选中的月份/栏目
         function switchNav() {
             // 隐藏所有分组
             document.querySelectorAll(`.${currentModule}-section`).forEach(section => {
                 section.classList.remove('active');
             });
-            
+
             // 显示当前分组
             const currentItemKey = navItems[currentNavIndex];
             document.getElementById(`${currentModule}-${currentItemKey}`).classList.add('active');
-            
+
             // 更新显示
             updateNavDisplay();
-            
+
             // 平滑滚动到顶部
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
         }
-        
+
         // 侧边栏控制
         function openSidebar() {
             document.getElementById('sidebar').style.left = '0';
             document.getElementById('overlay').style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
-        
+
         function closeSidebar() {
             document.getElementById('sidebar').style.left = '-250px';
             document.getElementById('overlay').style.display = 'none';
             document.body.style.overflow = '';
         }
-        
+
         // 模块下拉菜单控制
         function toggleModuleDropdown() {
             const dropdown = document.getElementById('moduleDropdown');
             isModuleDropdownOpen = !isModuleDropdownOpen;
             dropdown.style.display = isModuleDropdownOpen ? 'block' : 'none';
         }
-        
+
         function closeModuleDropdown() {
             isModuleDropdownOpen = false;
             document.getElementById('moduleDropdown').style.display = 'none';
         }
-        
+
         // 绑定事件
         function bindEvents() {
             // 模块切换按钮
@@ -485,7 +496,7 @@
                 e.stopPropagation();
                 toggleModuleDropdown();
             });
-            
+
             // 模块切换菜单项
             document.querySelectorAll('#moduleDropdown a').forEach(item => {
                 item.addEventListener('click', (e) => {
@@ -494,7 +505,7 @@
                     initModule(moduleKey);
                 });
             });
-            
+
             // 导航按钮
             document.getElementById('prevNav').addEventListener('click', () => {
                 if (currentNavIndex > 0) {
@@ -502,14 +513,14 @@
                     switchNav();
                 }
             });
-            
+
             document.getElementById('nextNav').addEventListener('click', () => {
                 if (currentNavIndex < navItems.length - 1) {
                     currentNavIndex++;
                     switchNav();
                 }
             });
-            
+
             // 键盘导航
             document.addEventListener('keydown', (e) => {
                 if (e.keyCode === 37) { // 左箭头
@@ -524,12 +535,12 @@
                     }
                 }
             });
-            
+
             // 侧边栏事件
             document.getElementById('menuIcon').addEventListener('click', openSidebar);
             document.getElementById('closeBtn').addEventListener('click', closeSidebar);
             document.getElementById('overlay').addEventListener('click', closeSidebar);
-            
+
             // 点击外部关闭模块下拉菜单
             document.addEventListener('click', (e) => {
                 if (isModuleDropdownOpen) {
@@ -537,13 +548,13 @@
                 }
             });
         }
-        
+
         // 初始化
         function init() {
             initModule(currentModule);
             bindEvents();
         }
-        
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
